@@ -1,5 +1,4 @@
 function App() {
-  const check = 2;
   return (
     <>
       <div className="flex h-[100vh]">
