@@ -1,6 +1,7 @@
 import ShortResume from './Pages/ShortResume';
 
 function App() {
+  // This variable is never used
   const check = 4;
   return (
     <>
