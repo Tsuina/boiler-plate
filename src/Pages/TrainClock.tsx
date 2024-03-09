@@ -17,8 +17,27 @@ type Position = {
 
 const TrainClock: FC<TrainClockProps> = () => {
   const [userPos, setUserPos] = useState<Position>();
+  const [value, setValue] = useState('');
+  const [userCity, sertUserCity] = useState('');
+  const [userCounty, sertUserCounty] = useState('');
+  const [userCountry, sertUserCountry] = useState('');
 
-  useEffect(() => console.log('checking the position', userPos), []);
+  // This is Gwenael Oppitz's personal API KEY on Geoapify
+  const geoapifyApiKey = '82be8d4c612a491ea8119ca510bef22a';
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(success, error);
+    } else {
+      console.log('Geolocation not supported');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userPos) {
+      getPositionFromCoordinates();
+    }
+  }, [userPos]);
 
   const success = (position: Position) => {
     const latitude = position.coords.latitude;
@@ -30,38 +49,74 @@ const TrainClock: FC<TrainClockProps> = () => {
     console.log('Unable to retrieve your location');
   };
 
-  //   function onPlaceSelect(value) {
-  //     console.log(value);
-  //   }
+  const getPositionFromCoordinates = () => {
+    fetch(
+      `https://api.geoapify.com/v1/geocode/reverse?lat=${userPos?.coords.latitude}&lon=${userPos?.coords.longitude}&format=json&apiKey=${geoapifyApiKey}`
+    )
+      .then((response) => response.json())
+      .then((json) => {
+        const { city, county, country } = json.results[0];
+        sertUserCity(city);
+        sertUserCounty(county);
+        sertUserCountry(country);
+        console.log('checking the result', city);
+      })
+      .catch((error) => console.log('error', error));
+  };
 
-  //   function onSuggectionChange(value) {
-  //     console.log(value);
-  //   }
-
-  return (
-    <GeoapifyContext apiKey="YOUR_API_KEY_HERE">
-      yo
-      {/* <GeoapifyGeocoderAutocomplete
-        placeholder="Enter address here"
-        type={type}
-        lang={language}
-        position={position}
-        countryCodes={countryCodes}
-        limit={limit}
-       placeSelect={onPlaceSelect}
-         value={displayValue}
-        suggestionsChange={onSuggectionChange}
-      /> */}
-    </GeoapifyContext>
-  );
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(success, error);
-  } else {
-    console.log('Geolocation not supported');
+  function onPlaceSelect(selection: string) {
+    console.log(selection);
+    setValue(selection);
   }
 
-  return <div>yo</div>;
+  function onSuggectionChange(value: string) {
+    console.log(value);
+  }
+
+  return (
+    <div>
+      <div>
+        you are in {userCountry}, {userCounty}, {userCity}
+      </div>
+      <GeoapifyContext apiKey={geoapifyApiKey}>
+        <GeoapifyGeocoderAutocomplete
+          placeholder="Enter your destination"
+          limit={10}
+          placeSelect={onPlaceSelect}
+          //   value={value}
+          onOpen={(e) => console.log('checking this crap', e)}
+          suggestionsChange={onSuggectionChange}
+          preprocessHook={(e) => {
+            console.log('checking if i can get something1', e);
+            return e;
+          }}
+          //   postprocessHook={(e) => {
+          //     console.log('checking if i can get something2', e);
+          //     return e.properties ;
+          //   }}
+          //   suggestionsFilter={(e) =>
+          //     console.log('checking if i can get something3', e)
+          //   }
+          //   sendGeocoderRequestFunc={(e) =>
+          //     {
+
+          //         console.log('checking if i can get something4', e)
+          //     }
+          //   }
+          //   sendPlaceDetailsRequestFunc={(e) =>
+          //     console.log('checking if i can get something5', e)
+          //   }
+          //   onUserInput={(e) =>
+          //     console.log('checking if i can get something6', e)
+          //   }
+          //   onOpen={(e) => console.log('checking if i can get something7', e)}
+          onClose={(e) => console.log('checking if i can get something8', e)}
+        />
+      </GeoapifyContext>
+    </div>
+  );
+
+  //   return <div>{userPos?.coords.latitude }</div>;
 };
 
 export default TrainClock;
