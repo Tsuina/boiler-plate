@@ -42,7 +42,6 @@ const TrainClock: FC<TrainClockProps> = () => {
   const success = (position: Position) => {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
-    console.log('checking the position', position);
     console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
     setUserPos(position);
   };
